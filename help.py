@@ -1,18 +1,13 @@
-import telebot
-from config import token
-
-bot = telebot.TeleBot(token)
+from load_bot import bot
 
 
-@bot.message_handler(commands=['help'])
+@bot.message_handler(commands=['/help'])
 def help_message(message):
-    bot.send_message(message.from_user.id, "Напиши привет")
+    bot.send_message(message.chat.id, "Напиши /start")
 
 
 def main():
-    # вот тут проблемка
-
-    help_message(message)
+    help_message()  # Какой именно аргумент тут надо передавать и надо ли вообще
 
 
 if __name__ == '__main__':

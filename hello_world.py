@@ -1,18 +1,13 @@
-import telebot
-from config import token
-
-bot = telebot.TeleBot(token)
+from load_bot import bot
 
 
 @bot.message_handler(commands=['hello_world'])
 def hello_world_message(message):
-    bot.send_message(message.from_user.id, "Мир отвечает тебе - Здравствуй!")
+    bot.send_message(message.chat.id, "Мир отвечает тебе - Здравствуй!")
 
 
 def main():
-    # вот тут проблемка
-
-    hello_world_message(message)
+    hello_world_message()
 
 
 if __name__ == '__main__':
