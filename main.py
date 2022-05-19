@@ -1,4 +1,7 @@
 from load_bot import bot
+import start
+import help
+import hello_world
 
 
 def main():

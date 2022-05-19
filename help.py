@@ -1,14 +1,7 @@
+from telebot.types import Message
 from load_bot import bot
 
 
 @bot.message_handler(commands=['/help'])
-def help_message(message):
-    bot.send_message(message.chat.id, "Напиши /start")
-
-
-def main():
-    help_message()  # Какой именно аргумент тут надо передавать и надо ли вообще
-
-
-if __name__ == '__main__':
-    main()
+def help_message(message: Message):
+    bot.send_message(message.from_user.id, "Напиши /start")
