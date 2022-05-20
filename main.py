@@ -1,11 +1,9 @@
 from load_bot import bot
-import start
-import help
-import hello_world
+import commands
 
 
 def main():
-    bot.polling(none_stop=True, interval=0)
+    bot.infinity_polling()
 
 
 if __name__ == '__main__':
