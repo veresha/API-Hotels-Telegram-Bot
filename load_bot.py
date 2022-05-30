@@ -1,5 +1,7 @@
 import telebot
-from config import token
+from telebot.storage import StateMemoryStorage
+from config_data.config import BOT_TOKEN
 
 
-bot = telebot.TeleBot(token)
+storage = StateMemoryStorage()
+bot = telebot.TeleBot(BOT_TOKEN, state_storage=storage)
