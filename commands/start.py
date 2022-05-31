@@ -3,24 +3,33 @@ from load_bot import bot
 from states.user_state import UserState
 
 
+def decorator_check_info(func):
+    def wrapper(message):
+        if not func():
+            bot.send_message(message.from_user.id, 'В имени города не может быть цифр.')
+        return wrapper
+
+
 @bot.message_handler(commands=['start'])
-def hello_message(message: Message):
-    bot.set_state(message.from_user.id, UserState.city, message.chat.id)
+def hello_message(*args, **kwargs):
+    bot.set_state(*args.from_user.id, UserState.city, message.chat.id)
     bot.send_message(
-        message.from_user.id,
+        args.from_user.id,
         "Привет, в какой город хотите отправиться?")
 
 
+@decorator_check_info
 @bot.message_handler(state=UserState.city)
-def get_city(message: Message) -> None:
+def get_city(message: Message) -> bool:
     if message.text.isalpha():
         bot.send_message(message.from_user.id, 'Записал! Теперь введите дату:')
         bot.set_state(message.from_user.id, UserState.city, message.chat.id)
 
         with bot.retrieve_city(message.from_user.id, message.chat.id) as data:
             data['city'] = message.text.lower()
-    else:
-        bot.send_message(message.from_user.id, 'В имени города не может быть цифр.')
+        return True
+    # else:
+    #     bot.send_message(message.from_user.id, 'В имени города не может быть цифр.')
 
 
 @bot.message_handler(state=UserState.date)
