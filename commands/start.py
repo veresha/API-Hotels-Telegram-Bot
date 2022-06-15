@@ -1,52 +1,53 @@
 from telebot.types import Message
 from load_bot import bot
 from states.user_state import UserState
+import functools
+from loguru import logger
+import re
 
 
-def decorator_check_info(func):
-    def wrapper(message):
-        if not func():
-            bot.send_message(message.from_user.id, 'В имени города не может быть цифр.')
-        return wrapper
+def decorator_check_info(text):
+    def wrapper(func):
+        @functools.wraps(func)
+        def wrapped_wrapper(message):
+            bot.send_message(message.from_user.id, text)
+            if not func():
+                bot.send_message(message.from_user.id, text)
+        return wrapped_wrapper
+    return wrapper
 
 
 @bot.message_handler(commands=['start'])
-def hello_message(*args, **kwargs):
-    bot.set_state(*args.from_user.id, UserState.city, message.chat.id)
+def hello_message(message):
+    bot.set_state(message.from_user.id, UserState.city, message.chat.id)
     bot.send_message(
-        args.from_user.id,
-        "Привет, в какой город хотите отправиться?")
+        message.from_user.id,
+        "Привет, в какой город хотите отправиться?"
+    )
 
 
-@decorator_check_info
+@decorator_check_info('Ошибка ввода, такого города не знаю!')
 @bot.message_handler(state=UserState.city)
 def get_city(message: Message) -> bool:
-    if message.text.isalpha():
-        bot.send_message(message.from_user.id, 'Записал! Теперь введите дату:')
+    city_pattern = r'\w+'
+    if re.fullmatch(city_pattern, message.text):
+        bot.send_message(message.from_user.id, 'Записал! Теперь введите дату в формате "Число/Месяц/Год":')
         bot.set_state(message.from_user.id, UserState.city, message.chat.id)
 
-        with bot.retrieve_city(message.from_user.id, message.chat.id) as data:
-            data['city'] = message.text.lower()
+        # with bot(message.from_user.id, message.chat.id) as data:
+        #     data['city'] = message.text.lower()
         return True
-    # else:
-    #     bot.send_message(message.from_user.id, 'В имени города не может быть цифр.')
 
 
+@decorator_check_info('Ошибка ввода, неправильно введена дата!')
 @bot.message_handler(state=UserState.date)
-def get_date(message: Message) -> None:
-    if message.text.isdigit():
-        bot.send_message(message.from_user.id, 'Записал! Теперь выберете дату:')
+def get_date(message: Message) -> bool:
+    date_pattern = r'\d+/\d+/\d+'
+    if re.fullmatch(date_pattern, message.text):
+        bot.send_message(message.from_user.id, 'Записал! Теперь выберете стоимость:')
         bot.set_state(message.from_user.id, UserState.date, message.chat.id)
 
-        with bot.retrieve_date(message.from_user.id, message.chat.id) as data:
-            data['date'] = message.text
-    else:
-        bot.send_message(message.from_user.id, 'В дате должны быть цифры.')
+        # with bot(message.from_user.id, message.chat.id) as data:
+        #     data['date'] = message.text
+        return True
 
-
-# Тут должны быть кнопки выбора стоимости
-
-# @bot.message_handler(state=UserState.hotel_price)
-# def get_hotel_price(message: Message) -> None:
-#     bot.send_message(message.from_user.id, 'Записал! Теперь выберете стоимость:')
-#     bot.set_state(message.from_user.id, UserState.hotel_price, message.chat.id)
