@@ -1,10 +1,11 @@
 from load_bot import bot
 import commands
-
-
-def main():
-    bot.infinity_polling()
+from utils.set_bot_commands import set_default_commands
+from telebot.custom_filters import StateFilter
 
 
 if __name__ == '__main__':
-    main()
+    bot.add_custom_filter(StateFilter(bot))
+    set_default_commands(bot)
+    bot.infinity_polling()
+
