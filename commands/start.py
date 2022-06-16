@@ -9,9 +9,11 @@ import re
 def decorator_check_info(text):
     def wrapper(func):
         @functools.wraps(func)
-        def wrapped_wrapper(message):
-            bot.send_message(message.from_user.id, text)
-            if not func():
+        def wrapped_wrapper(message, *args, **kwargs):
+            """
+            !!! Передаем аргументы в func !!!
+            """
+            if not func(message, *args, **kwargs):
                 bot.send_message(message.from_user.id, text)
         return wrapped_wrapper
     return wrapper
@@ -26,10 +28,16 @@ def hello_message(message):
     )
 
 
-@decorator_check_info('Ошибка ввода, такого города не знаю!')
+"""
+!!! Меняем местами декораторы !!!
+"""
 @bot.message_handler(state=UserState.city)
+@decorator_check_info('Ошибка ввода, такого города не знаю!')
 def get_city(message: Message) -> bool:
-    city_pattern = r'\w+'
+    """
+    !!! Регулярное выражение, учитывающее пробелы и дефис !!!
+    """
+    city_pattern = r'^\w+(?:[\s-]\w+)*$'
     if re.fullmatch(city_pattern, message.text):
         bot.send_message(message.from_user.id, 'Записал! Теперь введите дату в формате "Число/Месяц/Год":')
         bot.set_state(message.from_user.id, UserState.city, message.chat.id)
