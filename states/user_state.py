@@ -6,5 +6,5 @@ class UserState(StatesGroup):
     check_in = State()
     check_out = State()
     hotel_price = State()
-    hotels_number = State()
+    hotels_num = State()
     photos = State()
