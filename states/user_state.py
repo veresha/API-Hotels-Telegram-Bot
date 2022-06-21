@@ -5,6 +5,6 @@ class UserState(StatesGroup):
     city = State()
     check_in = State()
     check_out = State()
-    hotel_price = State()
     hotels_num = State()
     photos = State()
+    work_with_api = State()

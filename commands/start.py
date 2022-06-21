@@ -4,13 +4,9 @@ from states.user_state import UserState
 from getting_info import getting_info
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start', 'hello_world'])
 def hello_message(message: Message) -> None:
-    bot.set_state(message.from_user.id, UserState.city, message.chat.id)
     bot.send_message(
         message.from_user.id,
-        "Привет, в какой город хотите отправиться?"
-    )
-
-
-getting_info.main()
+        f'Привет, {message.from_user.username}! В какой ценовой категории будем искать отели?'
+        '\n/lowprice - дешёвые отели, \n/highprice - дорогие отели, \n/bestdeal - лучшее предложение')

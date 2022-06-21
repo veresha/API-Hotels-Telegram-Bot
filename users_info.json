@@ -1,61 +1,22 @@
 {
-  "1": [
+  "435203181": [
     {
-      "city": "ny"
+      "hotels_price": "PRICE_LOWEST_FIRST"
     },
-    {
-      "check_in": "12/12/12"
-    },
-    {
-      "check_out": "12/12/12"
-    }
-  ]
-}{
-  "1": [
     {
       "city": "boston"
     },
     {
-      "check_in": "12/12/12"
+      "check_in": "2022-12-12"
     },
     {
-      "check_out": "12/12/12"
-    }
-  ]
-}{
-  "1": [
-    {
-      "city": "grodno"
+      "check_out": "2022-12-15"
     },
     {
-      "check_in": "12/12/12"
+      "hotels_num": 4
     },
     {
-      "check_out": "12/12/12"
-    }
-  ]
-}{}{
-  "1": [
-    {
-      "city": "minsk"
-    },
-    {
-      "check_in": "12/12/12"
-    },
-    {
-      "check_out": "12/12/12"
-    }
-  ]
-}{
-  "1": [
-    {
-      "city": "gro"
-    },
-    {
-      "check_in": "12/12/12"
-    },
-    {
-      "check_out": "12/12/12"
+      "photos_num": 3
     }
   ]
 }
