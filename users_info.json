@@ -4,7 +4,10 @@
       "hotels_price": "PRICE_LOWEST_FIRST"
     },
     {
-      "city": "boston"
+      "city": "Boston"
+    },
+    {
+      "destination_id": "1401516"
     },
     {
       "check_in": "2022-12-12"
@@ -13,10 +16,7 @@
       "check_out": "2022-12-15"
     },
     {
-      "hotels_num": 4
-    },
-    {
-      "photos_num": 3
+      "hotels_num": 3
     }
   ]
 }

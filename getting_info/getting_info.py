@@ -4,7 +4,7 @@ from states.user_state import UserState
 import functools
 import re
 from users_info_storage.users_info_storage import users_info_dict
-from work_with_api.work_with_api import get_city_districts
+from work_with_api.work_with_api import get_city_districts, get_hotels
 from telebot.types import ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
 from keyboards.reply.district_choice import district_choice
 
@@ -71,12 +71,13 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей. '
-                                                   f'Сколько фото каждого отеля нужно?')
+            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей. ')
+                                                   #f'Сколько фото каждого отеля нужно?')
             users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
             bot.set_state(message.from_user.id, UserState.photos, message.chat.id)
+            get_hotels(message)
             return True
-    #
+
     # @decorator_check_info('Ошибка ввода, это должна быть цифра!')
     # @bot.message_handler(state=UserState.photos)
     # def get_photos_num(message: Message) -> bool:
