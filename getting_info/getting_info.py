@@ -54,28 +54,28 @@ def main():
             bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
             return True
 
-    # @decorator_check_info('Ошибка ввода, неправильно введена дата!')
-    # @bot.message_handler(state=UserState.check_out)
-    # def get_check_out(message: Message) -> bool:
-    #     if re.fullmatch(date_pattern, message.text):
-    #         bot.send_message(message.from_user.id, f'Записал! Дата выселения {message.text}. Сколько отелей показать?')
-    #         users_info_dict[message.from_user.id].append({'check_out': message.text})
-    #         bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
-    #         return True
-    #
-    # @decorator_check_info('Ошибка ввода, это должна быть цифра!')
-    # @bot.message_handler(state=UserState.hotels_num)
-    # def get_hotels_num(message: Message) -> bool:
-    #     try:
-    #         hotels_num = int(message.text)
-    #     except ValueError:
-    #         return False
-    #     else:
-    #         bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.
-    #         Сколько фото каждого отеля нужно?')
-    #         users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
-    #         bot.set_state(message.from_user.id, UserState.photos, message.chat.id)
-    #         return True
+    @decorator_check_info('Ошибка ввода, неправильно введена дата!')
+    @bot.message_handler(state=UserState.check_out)
+    def get_check_out(message: Message) -> bool:
+        if re.fullmatch(date_pattern, message.text):
+            bot.send_message(message.from_user.id, f'Записал! Дата выселения {message.text}. Сколько отелей показать?')
+            users_info_dict[message.from_user.id].append({'check_out': message.text})
+            bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
+            return True
+
+    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @bot.message_handler(state=UserState.hotels_num)
+    def get_hotels_num(message: Message) -> bool:
+        try:
+            hotels_num = int(message.text)
+        except ValueError:
+            return False
+        else:
+            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей. '
+                                                   f'Сколько фото каждого отеля нужно?')
+            users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
+            bot.set_state(message.from_user.id, UserState.photos, message.chat.id)
+            return True
     #
     # @decorator_check_info('Ошибка ввода, это должна быть цифра!')
     # @bot.message_handler(state=UserState.photos)
