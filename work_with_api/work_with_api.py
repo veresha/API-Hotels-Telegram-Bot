@@ -19,7 +19,11 @@ def get_city_districts(city) -> dict:
 	return districts
 
 	###################
+<<<<<<< HEAD
 # def get_hotels():
+=======
+
+>>>>>>> origin/work_with_API
 	# endpoint_hotels = 'properties/list'
 	# check_in = '2022-12-10' #users_info_dict[message.from_user.id]['check_in']
 	# check_out = '2022-12-15' #users_info_dict[message.from_user.id]['check_out']
