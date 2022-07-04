@@ -75,7 +75,14 @@ def main():
                                                    #f'Сколько фото каждого отеля нужно?')
             users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
             bot.set_state(message.from_user.id, UserState.photos, message.chat.id)
-            get_hotels(message)
+            hotels = get_hotels(message)
+            for hotel in hotels:
+                bot.send_message(message.from_user.id,
+                                 f'Название отеля: {hotel["name"]}\n'
+                                 f'Адрес: {hotel["address"]["streetAddress"]}\n'
+                                 f'Расстояние до центра: {hotel["landmarks"][0]["distance"]}\n'
+                                 f'Рейтинг: {hotel["guestReviews"]["rating"]}\n'
+                                 f'Стоимость: {hotel["ratePlan"]["price"]["current"]}')
             return True
 
     # @decorator_check_info('Ошибка ввода, это должна быть цифра!')

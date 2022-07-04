@@ -9,7 +9,7 @@ headers = {
 }
 
 
-def get_city_districts(city) -> dict:
+def get_city_districts(city: str) -> dict:
 	endpoint_city_id = 'locations/v2/search'
 	querystring = {"query": city}
 
@@ -29,14 +29,16 @@ def get_hotels(message: Message):
 	querystring = {
 		"destinationId": users_info_dict[message.from_user.id][2]['destination_id'], "pageNumber": "1",
 		"pageSize": hotels_num, "checkIn": check_in, "checkOut": check_out, "adults1": "1", "sortOrder": price,
-		"locale": "en_US", "currency": "USD"
+		"locale": "ru_RU", "currency": "USD"
 	}
 	response = requests.request("GET", url + endpoint_hotels, headers=headers, params=querystring)
 
 	hotels = response.json()['data']['body']["searchResults"]['results']
 
-	for i in hotels:
-		print(i['name'])
-		print(i['guestReviews']['rating'])
-		print(i['ratePlan']['price']['current'])
-		print('***********')
+	# for i in hotels:
+	# 	print(i['name'])
+	# 	print(i['guestReviews']['rating'])
+	# 	print(i['ratePlan']['price']['current'])
+	# 	print('***********')
+
+	return hotels
