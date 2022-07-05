@@ -71,22 +71,21 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.\n'
-                                                   f'Сколько фото каждого отеля нужно?')
+            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.\n')
+                                                   # f'Сколько фото каждого отеля нужно?')
             users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
-            bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
             hotels = get_hotels(message)
             hotels_id = []
             for hotel in hotels:
                 hotels_id.append(hotel['id'])
+                bot.send_message(message.from_user.id,
+                                 f'Название отеля: {hotel["name"]}\n'
+                                 f'Адрес: {hotel["address"]["streetAddress"]}\n'
+                                 f'Расстояние до центра: {hotel["landmarks"][0]["distance"]}\n'
+                                 f'Рейтинг: {hotel["guestReviews"]["rating"]}\n'
+                                 f'Стоимость: {hotel["ratePlan"]["price"]["current"]}')
             users_info_dict[message.from_user.id].append({'hotels_id': hotels_id})
-
-            bot.send_message(message.from_user.id,
-                             f'Название отеля: {hotel["name"]}\n'
-                             f'Адрес: {hotel["address"]["streetAddress"]}\n'
-                             f'Расстояние до центра: {hotel["landmarks"][0]["distance"]}\n'
-                             f'Рейтинг: {hotel["guestReviews"]["rating"]}\n'
-                             f'Стоимость: {hotel["ratePlan"]["price"]["current"]}')
+            bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
             return True
 
     # @decorator_check_info('Ошибка ввода, это должна быть цифра!')
