@@ -12,12 +12,14 @@ headers = {
 def get_city_districts(city: str) -> dict:
 	endpoint_city_id = 'locations/v2/search'
 	querystring = {"query": city}
-
-	response = requests.request("GET", url + endpoint_city_id, headers=headers, params=querystring)
-	districts = {}
-	for district in response.json()['suggestions'][0]['entities']:
-		districts[district['name']] = district['destinationId']
-	return districts
+	response = requests.get(url + endpoint_city_id, headers=headers, params=querystring, timeout=10)
+	if response.status_code == requests.codes.ok:
+		districts = {}
+		for district in response.json()['suggestions'][0]['entities']:
+			districts[district['name']] = district['destinationId']
+		return districts
+	else:
+		print('Ошибка ', response.status_code)
 
 
 def get_hotels(message: Message):
@@ -31,14 +33,9 @@ def get_hotels(message: Message):
 		"pageSize": hotels_num, "checkIn": check_in, "checkOut": check_out, "adults1": "1", "sortOrder": price,
 		"locale": "ru_RU", "currency": "USD"
 	}
-	response = requests.request("GET", url + endpoint_hotels, headers=headers, params=querystring)
-
-	hotels = response.json()['data']['body']["searchResults"]['results']
-
-	# for i in hotels:
-	# 	print(i['name'])
-	# 	print(i['guestReviews']['rating'])
-	# 	print(i['ratePlan']['price']['current'])
-	# 	print('***********')
-
-	return hotels
+	response = requests.get(url + endpoint_hotels, headers=headers, params=querystring, timeout=10)
+	if response.status_code == requests.codes.ok:
+		hotels = response.json()['data']['body']["searchResults"]['results']
+		return hotels
+	else:
+		print('Ошибка ', response.status_code)
