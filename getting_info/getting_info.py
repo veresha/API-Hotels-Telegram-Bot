@@ -7,9 +7,10 @@ from users_info_storage.users_info_storage import users_info_dict
 from work_with_api.work_with_api import get_city_districts, get_hotels
 from telebot.types import ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
 from keyboards.reply.district_choice import district_choice
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
 city_pattern = r'^\w+(?:[\s-]\w+)*$'
-date_pattern = r'[2022+]\d+-[1-12]\d+-[1-31]\d+'
+date_pattern = r'((20\d\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01]))'
 
 
 def decorator_check_info(text):
@@ -38,18 +39,33 @@ def main():
     def choice_district(message: Message):
         users_info_dict[message.from_user.id].append({'city': message.text})
         bot.send_message(message.from_user.id, f'Записал! Вы выбрали {message.text}.'
-                                               '\nТеперь выберите дату заселения, либо введите в формате "гггг-мм-чч":',
+                                               'Теперь выберете дату заселения в формате гггг-мм-дд',
                          reply_markup=ReplyKeyboardRemove())
         city_districts = get_city_districts(message.text)
         users_info_dict[message.from_user.id].append({'destination_id': city_districts[message.text]})
         bot.set_state(message.from_user.id, UserState.check_in, message.chat.id)
 
+    # @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+    # def cal(c):
+    #     result, key, step = DetailedTelegramCalendar().process(c.data)
+    #     if not result and key:
+    #         bot.edit_message_text(f"Select {LSTEP[step]}",
+    #                               c.message.chat.id,
+    #                               c.message.message_id,
+    #                               reply_markup=key)
+    #     elif result:
+    #         bot.edit_message_text(f"Вы выбрали {result}",
+    #                               c.message.chat.id,
+    #                               c.message.message_id)
+
     @decorator_check_info('Ошибка ввода, неправильно введена дата!')
     @bot.message_handler(state=UserState.check_in)
     def get_check_in(message: Message) -> bool:
+        # calendar, step = DetailedTelegramCalendar().build()
         if re.fullmatch(date_pattern, message.text):
             bot.send_message(message.from_user.id, f'Записал! Дата заселения {message.text}. '
-                                                   f'Теперь выберете дату выезда: ')
+                                                   f'Теперь выберете дату выезда:')
+                                                   # f'{LSTEP[step]}', reply_markup=calendar)
             users_info_dict[message.from_user.id].append({'check_in': message.text})
             bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
             return True
