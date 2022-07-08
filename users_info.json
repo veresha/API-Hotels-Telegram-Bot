@@ -4,26 +4,22 @@
       "hotels_price": "PRICE_HIGHEST_FIRST"
     },
     {
-      "city": "Midtown"
+      "city": "Queens"
     },
     {
-      "destination_id": "1808594"
+      "destination_id": "1633594"
     },
     {
-      "check_in": "2022-07-12"
+      "check_in": "2022-07-08"
     },
     {
-      "check_out": "2022-07-18"
+      "check_in": "2022-07-09"
     },
     {
-      "hotels_num": 3
+      "check_in": "2022-09-22"
     },
     {
-      "hotels_id": [
-        2019614560,
-        117722,
-        244489
-      ]
+      "check_in": "2022-09-22"
     }
   ]
 }
