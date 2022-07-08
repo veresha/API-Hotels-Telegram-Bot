@@ -49,7 +49,7 @@ def main():
                          reply_markup=calendar)
         bot.set_state(message.from_user.id, UserState.check_in, message.chat.id)
 
-        @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+        @bot.callback_query_handler(state=UserState.check_in, func=DetailedTelegramCalendar.func())
         def callback_check_in(callback):
             result, key, step = DetailedTelegramCalendar(
                 locale='ru', min_date=datetime.date.today()).process(callback.data)
@@ -65,29 +65,6 @@ def main():
                 users_info_dict[message.from_user.id].append({'check_in': str(result)})
                 bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
 
-    # @bot.message_handler(state=UserState.check_in)
-    # def get_check_in(message):
-        # calendar, step = DetailedTelegramCalendar(locale='ru', min_date=datetime.date.today()).build()
-        # bot.send_message(message.from_user.id, f'Теперь выберете дату заселения',
-        #                  reply_markup=calendar)
-        # bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
-
-        # @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
-        # def callback_check(callback):
-        #     result, key, step = DetailedTelegramCalendar(
-        #         locale='ru', min_date=datetime.date.today()).process(callback.data)
-        #     if not result and key:
-        #         bot.edit_message_text(f"Выберите {LSTEP[step]}",
-        #                               callback.message.chat.id,
-        #                               callback.message.message_id,
-        #                               reply_markup=key)
-        #     elif result:
-        #         bot.edit_message_text(f"Записал! Дата заселения {result}",
-        #                               callback.message.chat.id,
-        #                               callback.message.message_id)
-                # users_info_dict[message.from_user.id].append({'check_in': str(result)})
-                # bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
-
     @bot.message_handler(state=UserState.check_out)
     def get_check_out(message):
         calendar, step = DetailedTelegramCalendar().build()
@@ -98,7 +75,7 @@ def main():
         @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
         def callback_check_out(callback):
             result, key, step = DetailedTelegramCalendar(
-                locale='ru', min_date=users_info_dict[message.from_user.id]['check_in']).process(callback.data)
+                locale='ru', min_date=datetime.date.today()).process(callback.data)
             if not result and key:
                 bot.edit_message_text(f"Выберите {LSTEP[step]}",
                                       callback.message.chat.id,

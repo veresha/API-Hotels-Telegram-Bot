@@ -1,25 +1,31 @@
 {
   "435203181": [
     {
-      "hotels_price": "PRICE_HIGHEST_FIRST"
+      "hotels_price": "PRICE_LOWEST_FIRST"
     },
     {
-      "city": "Queens"
+      "city": "Brooklyn"
     },
     {
-      "destination_id": "1633594"
+      "destination_id": "1438163"
     },
     {
-      "check_in": "2022-07-08"
+      "check_in": "2022-09-01"
     },
     {
-      "check_in": "2022-07-09"
+      "check_out": "2022-09-14"
     },
     {
-      "check_in": "2022-09-22"
+      "hotels_num": 5
     },
     {
-      "check_in": "2022-09-22"
+      "hotels_id": [
+        199322,
+        541149,
+        351654,
+        153479,
+        224628
+      ]
     }
   ]
 }
