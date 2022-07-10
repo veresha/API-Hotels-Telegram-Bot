@@ -1,1 +1,1 @@
-from . import price
+from . import district_choice
