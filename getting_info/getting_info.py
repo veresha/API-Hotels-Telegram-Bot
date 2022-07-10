@@ -43,11 +43,14 @@ def main():
                          reply_markup=ReplyKeyboardRemove())
         city_districts = get_city_districts(message.text)
         users_info_dict[message.from_user.id].append({'destination_id': city_districts[message.text]})
-        ###############
+        bot.set_state(message.from_user.id, UserState.check_in, message.chat.id)
+        get_check_in(message)
+
+    @bot.message_handler(state=UserState.check_out)
+    def get_check_in(message: Message):
         calendar, step = DetailedTelegramCalendar(locale='ru', min_date=datetime.date.today()).build()
         bot.send_message(message.from_user.id, f'Теперь выберете дату заселения',
                          reply_markup=calendar)
-        bot.set_state(message.from_user.id, UserState.check_in, message.chat.id)
 
         @bot.callback_query_handler(state=UserState.check_in, func=DetailedTelegramCalendar.func())
         def callback_check_in(callback):
@@ -59,18 +62,19 @@ def main():
                                       callback.message.message_id,
                                       reply_markup=key)
             elif result:
-                bot.edit_message_text(f"Дата заселения {result}.\nВерно?",
+                bot.edit_message_text(f"Дата заселения {result}.",
                                       callback.message.chat.id,
                                       callback.message.message_id)
                 users_info_dict[message.from_user.id].append({'check_in': str(result)})
                 bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
+                get_check_out(message)
 
     @bot.message_handler(state=UserState.check_out)
-    def get_check_out(message):
+    def get_check_out(message: Message):
         calendar, step = DetailedTelegramCalendar().build()
         bot.send_message(message.from_user.id, f'Теперь выберете дату выезда',
                          reply_markup=calendar)
-        bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
+        # check_in_date = datetime.datetime.strptime(users_info_dict[message.from_user.id][3]['check_in'], "%Y-%m-%d")
 
         @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
         def callback_check_out(callback):
@@ -88,15 +92,12 @@ def main():
                 users_info_dict[message.from_user.id].append({'check_out': str(result)})
                 bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
 
-
     # @decorator_check_info('Ошибка ввода, неправильно введена дата!')
     # @bot.message_handler(state=UserState.check_in)
     # def get_check_in(message: Message) -> bool:
-    #     # calendar, step = DetailedTelegramCalendar().build()
     #     if re.fullmatch(date_pattern, message.text):
     #         bot.send_message(message.from_user.id, f'Записал! Дата заселения {message.text}. '
     #                                                f'Теперь выберете дату выезда:')
-    #                                                # f'{LSTEP[step]}', reply_markup=calendar)
     #         users_info_dict[message.from_user.id].append({'check_in': message.text})
     #         bot.set_state(message.from_user.id, UserState.check_out, message.chat.id)
     #         return True
@@ -129,8 +130,10 @@ def main():
                                  f'Название отеля: {hotel["name"]}\n'
                                  f'Адрес: {hotel["address"]["streetAddress"]}\n'
                                  f'Расстояние до центра: {hotel["landmarks"][0]["distance"]}\n'
-                                 f'Рейтинг: {hotel["guestReviews"]["rating"]}\n'
-                                 f'Стоимость: {hotel["ratePlan"]["price"]["current"]}')
+                                 f'Рейтинг от пользователей: {hotel["guestReviews"]["rating"]}\n'
+                                 f'Рейтинг по звёздам: {hotel["starRating"]}\n'
+                                 f'Цена за ночь: {hotel["ratePlan"]["price"]["current"]}')
+                                 # f'Стоимость за весь период: {hotel["ratePlan"]["price"]["totalPricePerStay"]}')
             users_info_dict[message.from_user.id].append({'hotels_id': hotels_id})
             bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
             return True

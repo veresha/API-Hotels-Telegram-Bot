@@ -4,28 +4,19 @@
       "hotels_price": "PRICE_LOWEST_FIRST"
     },
     {
-      "city": "Brooklyn"
+      "city": "New York"
     },
     {
-      "destination_id": "1438163"
+      "destination_id": "1506246"
     },
     {
-      "check_in": "2022-09-01"
+      "check_in": "2022-08-03"
     },
     {
-      "check_out": "2022-09-14"
+      "check_out": "2022-08-10"
     },
     {
-      "hotels_num": 5
-    },
-    {
-      "hotels_id": [
-        199322,
-        541149,
-        351654,
-        153479,
-        224628
-      ]
+      "hotels_num": 3
     }
   ]
 }
