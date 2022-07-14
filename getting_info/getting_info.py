@@ -2,13 +2,13 @@ from telebot.types import Message
 from load_bot import bot
 from states.user_state import UserState
 import functools
-import re
 from users_info_storage.users_info_storage import users_info_dict
 from work_with_api.work_with_api import get_city_districts, get_hotels, get_photos
 from telebot.types import ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
 from keyboards.reply.district_choice import district_choice
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 import datetime
+from loguru import logger
 
 
 def decorator_check_info(text):
@@ -43,7 +43,7 @@ def main():
         bot.set_state(message.from_user.id, UserState.check_in, message.chat.id)
         get_check_in(message)
 
-    @bot.message_handler(state=UserState.check_out)
+    @bot.message_handler(state=UserState.check_in)
     def get_check_in(message: Message):
         calendar, step = DetailedTelegramCalendar(locale='ru', min_date=datetime.date.today()).build()
         bot.send_message(message.from_user.id, f'Теперь выберете дату заселения',
@@ -98,16 +98,25 @@ def main():
         except ValueError:
             return False
         else:
+            logger.debug('Запрос у пользователя кол-ва фоток')
             bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.\n'
                                                    f'Сколько фото каждого отеля нужно?')
-            hotels = get_hotels(message, hotels_num)
+            logger.debug('Начало работы с апи')
+            while True:
+                hotels = get_hotels(message, hotels_num)
+                if type(hotels) is dict:
+                    logger.debug(hotels)
+                    break
+            logger.debug('Конец работы с апи')
             users_info_dict[message.from_user.id].append({'hotels': hotels})
             bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
+            logger.debug('Состояние сменилось')
             return True
 
     @decorator_check_info('Ошибка ввода, это должна быть цифра!')
     @bot.message_handler(state=UserState.photos_num)
     def get_photos_num(message: Message) -> bool:
+        logger.debug('Запрос кол-ва фоток прошёл')
         try:
             photos_num = int(message.text)
         except ValueError:

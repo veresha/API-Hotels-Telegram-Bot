@@ -1,7 +1,5 @@
 from telebot.types import Message
 from load_bot import bot
-from states.user_state import UserState
-from getting_info import getting_info
 
 
 @bot.message_handler(commands=['start', 'hello_world'])
