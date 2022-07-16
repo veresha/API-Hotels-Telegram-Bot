@@ -101,13 +101,7 @@ def main():
             logger.debug('Запрос у пользователя кол-ва фоток')
             bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.\n'
                                                    f'Сколько фото каждого отеля нужно?')
-            logger.debug('Начало работы с апи')
-            while True:
-                hotels = get_hotels(message, hotels_num)
-                if type(hotels) is dict:
-                    logger.debug(hotels)
-                    break
-            logger.debug('Конец работы с апи')
+            hotels = get_hotels(message, hotels_num)
             users_info_dict[message.from_user.id].append({'hotels': hotels})
             bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
             logger.debug('Состояние сменилось')

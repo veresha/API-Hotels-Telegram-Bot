@@ -11,7 +11,7 @@ headers = {
 	"X-RapidAPI-Host": "hotels4.p.rapidapi.com"}
 
 
-def request_to_api(endpoint, querystring):
+def request_to_api(endpoint: str, querystring: dict):
 	try:
 		logger.debug('Запрос к апи')
 		response = requests.get(url + endpoint, headers=headers, params=querystring, timeout=10)
@@ -20,9 +20,9 @@ def request_to_api(endpoint, querystring):
 			logger.debug('Проверка статус кода и возврат ответа')
 			return response
 		else:
-			print('Ошибка ', response.status_code)
+			print('Ошибка', response.status_code)
 	except Exception:
-		print('Ошибка.', Exception)
+		print('Ошибка', Exception)
 
 
 def get_city_districts(city: str) -> dict:
@@ -30,7 +30,7 @@ def get_city_districts(city: str) -> dict:
 	querystring = {"query": city}
 	response = request_to_api(endpoint=endpoint_city_id, querystring=querystring)
 	districts = {}
-	for district in response.json()['suggestions'][0]['entities']:
+	for district in response.json().get('suggestions', {})[0].get('entities'):
 		districts[district['name']] = district['destinationId']
 	return districts
 
@@ -45,31 +45,30 @@ def get_hotels(message: Message, hotels_num: int) -> dict:
 		"pageSize": hotels_num, "checkIn": check_in, "checkOut": check_out, "adults1": "1", "sortOrder": price,
 		"locale": "ru_RU", "currency": "USD"
 	}
-	logger.debug('Запрос к апи')
 	response = request_to_api(endpoint=endpoint_hotels, querystring=querystring)
-	logger.debug('Получение ответа от апи')
-	hotels = response.json()['data']['body']["searchResults"]['results']
+	# response = requests.get(url + endpoint_hotels, headers=headers, params=querystring, timeout=10)
+
+	hotels = response.json().get('data', {}).get('body', {}).get("searchResults", {}).get('results')
 	hotels_info = {}
 	for hotel in hotels:
-		try:
-			hotels_info[hotel['id']] = f'Название отеля: {hotel["name"]}\n'\
-									f'Адрес: {hotel["address"]["streetAddress"]}\n'\
-									f'Расстояние до центра: {hotel["landmarks"][0]["distance"]}\n'\
-									f'Рейтинг от пользователей: {hotel["guestReviews"]["rating"]}\n'\
-									f'Рейтинг по звёздам: {hotel["starRating"]}\n'\
-									f'Цена за ночь: {hotel["ratePlan"]["price"]["current"]}'
-		except KeyError:
-			print('Отсутствует ключ')
-			########################
+		hotels_info[hotel['id']] = f'Название отеля: {hotel.get("name", {})}\n'\
+								f'Адрес: {hotel.get("address", {}).get("streetAddress", {})}\n'\
+								f'Расстояние до центра: {hotel.get("landmarks", {})[0].get("distance", {})}\n'\
+								f'Рейтинг от пользователей: {hotel.get("guestReviews", {}).get("rating", {})}\n'\
+								f'Рейтинг по звёздам: {hotel.get("starRating", {})}\n'\
+								f'Цена за ночь: {hotel.get("ratePlan", {}).get("price", {}).get("current", {})}'
 	return hotels_info
 
 
-def get_photos(hotel_id, photos_num) -> list:
+def get_photos(hotel_id: str, photos_num: int) -> list:
 	endpoint_photos = 'get-hotel-photos'
 	querystring = {"id": hotel_id}
 	response = request_to_api(endpoint=endpoint_photos, querystring=querystring)
-	photos = []
-	for photo in response.json()["hotelImages"]:
-		photos.append(str(photo['baseUrl']).replace('{size}', 'y'))
-	return photos
+	final_photos = []
+	photos = response.json().get("hotelImages", {})
+	for num, photo in enumerate(photos):
+		final_photos.append(str(photo.get('baseUrl', {})).replace('{size}', 'y'))
+		if num == photos_num:
+			break
+	return final_photos
 
