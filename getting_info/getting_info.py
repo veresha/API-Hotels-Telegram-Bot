@@ -98,29 +98,26 @@ def main():
         except ValueError:
             return False
         else:
-            logger.debug('Запрос у пользователя кол-ва фоток')
             bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.\n'
                                                    f'Сколько фото каждого отеля нужно?')
-            hotels = get_hotels(message, hotels_num)
-            users_info_dict[message.from_user.id].append({'hotels': hotels})
+            users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
             bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
-            logger.debug('Состояние сменилось')
             return True
 
     @decorator_check_info('Ошибка ввода, это должна быть цифра!')
     @bot.message_handler(state=UserState.photos_num)
     def get_photos_num(message: Message) -> bool:
-        logger.debug('Запрос кол-ва фоток прошёл')
         try:
             photos_num = int(message.text)
         except ValueError:
             return False
         else:
             bot.send_message(message.from_user.id, f'Загружаю {message.text} фото')
-            for hotel_id, hotel_info in users_info_dict[message.from_user.id][5]['hotels'].items():
-                # photos = get_photos(hotel_id, photos_num)
-                # for photo in photos:
-                #     bot.send_photo(message.from_user.id, photo)
+            hotels = get_hotels(message)
+            for hotel_id, hotel_info in hotels.items():
+                photos = get_photos(hotel_id, photos_num)
+                for photo in photos:
+                    bot.send_photo(message.from_user.id, photo)
                 bot.send_message(message.from_user.id, hotel_info)
             return True
 
