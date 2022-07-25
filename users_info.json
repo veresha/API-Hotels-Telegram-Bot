@@ -1,22 +1,34 @@
 {
   "435203181": [
     {
-      "hotels_price": "PRICE_LOWEST_FIRST"
+      "hotels_price": "BEST_SELLER"
     },
     {
-      "city": "Warsaw"
+      "city": "Manhattan"
     },
     {
-      "destination_id": "1634493"
+      "destination_id": "1643911"
     },
     {
-      "check_in": "2022-09-24"
+      "check_in": "2022-09-01"
     },
     {
-      "check_out": "2022-09-29"
+      "check_out": "2022-09-03"
     },
     {
       "hotels_num": 3
+    },
+    {
+      "min_price": 1
+    },
+    {
+      "max_price": 10000
+    },
+    {
+      "min_dist": 1
+    },
+    {
+      "max_dist": 10000
     }
   ]
 }

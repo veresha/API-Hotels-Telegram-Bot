@@ -1,13 +1,10 @@
 import requests
 from users_info_storage.users_info_storage import users_info_dict
 from telebot.types import Message
-import json
-import re
-from loguru import logger
 
 url = "https://hotels4.p.rapidapi.com/"
 headers = {
-	"X-RapidAPI-Key": "79b22035d4msh81e225cd5d7c59dp106dccjsn38e17a5d4d9b",
+	"X-RapidAPI-Key": "dfdcae03ffmsh6500f2709b7b791p162bf0jsn593c1397f57a",
 	"X-RapidAPI-Host": "hotels4.p.rapidapi.com"}
 
 
@@ -34,17 +31,27 @@ def get_city_districts(city: str) -> dict:
 
 def get_hotels(message: Message) -> dict:
 	endpoint_hotels = 'properties/list'
-	destination_id = users_info_dict[message.from_user.id][2]['destination_id']
-	check_in = users_info_dict[message.from_user.id][3]['check_in']
-	check_out = users_info_dict[message.from_user.id][4]['check_out']
-	price = users_info_dict[message.from_user.id][0]['hotels_price']
-	hotels_num = users_info_dict[message.from_user.id][5]['hotels_num']
+	destination_id = users_info_dict.get(message.from_user.id)[2]['destination_id']
+	check_in = users_info_dict.get(message.from_user.id)[3]['check_in']
+	check_out = users_info_dict.get(message.from_user.id)[4]['check_out']
+	price = users_info_dict.get(message.from_user.id)[0]['hotels_price']
+	hotels_num = users_info_dict.get(message.from_user.id)[5]['hotels_num']
+	try:
+		min_price = users_info_dict.get(message.from_user.id)[6]['min_price']
+		max_price = users_info_dict.get(message.from_user.id)[7]['max_price']
+		# min_dist = users_info_dict[message.from_user.id][8]['min_dist']
+		# max_dist = users_info_dict[message.from_user.id][5]['max_dist']
+	except IndexError:
+		min_price = None
+		max_price = None
 	querystring = {
 		"destinationId": destination_id,
 		"pageNumber": "1",
 		"pageSize": hotels_num,
 		"checkIn": check_in,
 		"checkOut": check_out,
+		"priceMin": min_price,
+		"priceMax": max_price,
 		"adults1": "1", "sortOrder": price,
 		"locale": "ru_RU", "currency": "USD"
 	}
@@ -52,12 +59,13 @@ def get_hotels(message: Message) -> dict:
 	hotels = response.json().get('data', {}).get('body', {}).get("searchResults", {}).get('results')
 	hotels_info = {}
 	for hotel in hotels:
-		hotels_info[hotel['id']] = (f'🏨 Название отеля: {hotel.get("name", {})}\n'
+		hotels_info[hotel.get("id", {})] = (f'🏨 Название отеля: {hotel.get("name", {})}\n'
 									f'🌎 Адрес: {hotel.get("address", {}).get("streetAddress", {})}\n'
 									f'🌇 Расстояние до центра: {hotel.get("landmarks", {})[0].get("distance", {})}\n'
 									f'⭐ Рейтинг от пользователей: {hotel.get("guestReviews", {}).get("rating", {})}\n'
 									f'✨ Рейтинг по звёздам: {hotel.get("starRating", {})}\n'
-									f'1️⃣ Цена за ночь: {hotel.get("ratePlan", {}).get("price", {}).get("current", {})}')
+									f'1️⃣ Цена за ночь: {hotel.get("ratePlan", {}).get("price", {}).get("current", {})}\n'
+									f'🌐 Сайт: https://www.hotels.com/ho{hotel.get("id", {})}')
 	return hotels_info
 
 

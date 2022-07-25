@@ -4,11 +4,10 @@ from states.user_state import UserState
 import functools
 from users_info_storage.users_info_storage import users_info_dict
 from work_with_api.work_with_api import get_city_districts, get_hotels, get_photos
-from telebot.types import ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
+from telebot.types import ReplyKeyboardRemove
 from keyboards.reply.district_choice import district_choice
-from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
-import datetime
-from loguru import logger
+from keyboards.inline.calendar import MyStyleCalendar
+from datetime import datetime, timedelta, date
 
 
 def decorator_check_info(text):
@@ -45,16 +44,16 @@ def main():
 
     @bot.message_handler(state=UserState.check_in)
     def get_check_in(message: Message):
-        calendar, step = DetailedTelegramCalendar(locale='ru', min_date=datetime.date.today()).build()
-        bot.send_message(message.from_user.id, f'Теперь выберете дату заселения',
+        calendar, step = MyStyleCalendar(locale='ru', min_date=date.today()).build()
+        bot.send_message(message.from_user.id, f'Теперь выберите дату заселения',
                          reply_markup=calendar)
 
-        @bot.callback_query_handler(state=UserState.check_in, func=DetailedTelegramCalendar.func())
+        @bot.callback_query_handler(state=UserState.check_in, func=MyStyleCalendar.func())
         def callback_check_in(callback):
-            result, key, step = DetailedTelegramCalendar(
-                locale='ru', min_date=datetime.date.today()).process(callback.data)
+            result, key, step = MyStyleCalendar(
+                locale='ru', min_date=date.today()).process(callback.data)
             if not result and key:
-                bot.edit_message_text(f"Выберите {LSTEP[step]}",
+                bot.edit_message_text(f"Выберите дату заселения",
                                       callback.message.chat.id,
                                       callback.message.message_id,
                                       reply_markup=key)
@@ -68,26 +67,27 @@ def main():
 
     @bot.message_handler(state=UserState.check_out)
     def get_check_out(message: Message):
-        calendar, step = DetailedTelegramCalendar().build()
+        check_in_date = datetime.strptime(
+            users_info_dict[message.from_user.id][3]['check_in'], "%Y-%m-%d").date()
+        calendar, step = MyStyleCalendar(locale='ru', min_date=check_in_date).build()
         bot.send_message(message.from_user.id, f'Теперь выберете дату выезда',
                          reply_markup=calendar)
-        check_in_date = datetime.datetime.strptime(
-            users_info_dict[message.from_user.id][3]['check_in'], "%Y-%m-%d").date()
 
-        @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+        @bot.callback_query_handler(func=MyStyleCalendar.func())
         def callback_check_out(callback):
-            result, key, step = DetailedTelegramCalendar(
-                locale='ru', min_date=check_in_date).process(callback.data)
+            result, key, step = MyStyleCalendar(
+                locale='ru', min_date=check_in_date + timedelta(days=1)).process(callback.data)
             if not result and key:
-                bot.edit_message_text(f"Выберите {LSTEP[step]}",
+                bot.edit_message_text(f"Выберите дату выезда",
                                       callback.message.chat.id,
                                       callback.message.message_id,
                                       reply_markup=key)
             elif result:
-                bot.edit_message_text(f"Записал! Дата выезда {result}.\nСколько отелей показать?",
+                bot.edit_message_text(f"Записал! Дата выезда {result}.",
                                       callback.message.chat.id,
                                       callback.message.message_id)
                 users_info_dict[message.from_user.id].append({'check_out': str(result)})
+                bot.send_message(message.from_user.id, "Сколько отелей показать?")
                 bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
 
     @decorator_check_info('Ошибка ввода, это должна быть цифра!')
@@ -98,11 +98,67 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.\n'
-                                                   f'Сколько фото каждого отеля нужно?')
+            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.')
             users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
-            bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
+            if users_info_dict[message.from_user.id][0]["hotels_price"] != "BEST_SELLER":
+                bot.send_message(message.from_user.id, "Сколько фото каждого отеля показать?")
+                bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
+            else:
+                bot.send_message(message.from_user.id, "Какая минимальная цена за ночь?")
+                bot.set_state(message.from_user.id, UserState.min_price, message.chat.id)
             return True
+
+    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @bot.message_handler(state=UserState.min_price)
+    def get_min_price(message: Message):
+        try:
+            min_price = int(message.text)
+        except ValueError:
+            return False
+        else:
+            bot.send_message(message.from_user.id, f'Записал, минимальная цена {message.text}.\n'
+                                                   f'Какая максимальная цена за ночь?')
+            users_info_dict[message.from_user.id].append({'min_price': min_price})
+            bot.set_state(message.from_user.id, UserState.max_price, message.chat.id)
+
+    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @bot.message_handler(state=UserState.max_price)
+    def get_max_price(message: Message):
+        try:
+            max_price = int(message.text)
+        except ValueError:
+            return False
+        else:
+            bot.send_message(message.from_user.id, f'Записал, максмальная цена {message.text}.\n'
+                                                   f'Какое минимальное расстояние до центра?')
+            users_info_dict[message.from_user.id].append({'max_price': max_price})
+            bot.set_state(message.from_user.id, UserState.min_dist, message.chat.id)
+
+    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @bot.message_handler(state=UserState.min_dist)
+    def get_min_dist(message: Message):
+        try:
+            min_dist = int(message.text)
+        except ValueError:
+            return False
+        else:
+            bot.send_message(message.from_user.id, f'Записал, минимальное расстояние {message.text}.\n'
+                                                   f'Какое максимальное расстояние до центра?')
+            users_info_dict[message.from_user.id].append({'min_dist': min_dist})
+            bot.set_state(message.from_user.id, UserState.max_dist, message.chat.id)
+
+    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @bot.message_handler(state=UserState.max_dist)
+    def get_max_dist(message: Message):
+        try:
+            max_dist = int(message.text)
+        except ValueError:
+            return False
+        else:
+            bot.send_message(message.from_user.id, f'Записал, максимальное расстояние {message.text}.\n'
+                                                   f'Сколько фото каждого отеля показать?')
+            users_info_dict[message.from_user.id].append({'max_dist': max_dist})
+            bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
 
     @decorator_check_info('Ошибка ввода, это должна быть цифра!')
     @bot.message_handler(state=UserState.photos_num)
@@ -112,13 +168,19 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Загружаю {message.text} фото')
+            bot.send_message(message.from_user.id, f'Загружаю по {message.text} фото')
             hotels = get_hotels(message)
             for hotel_id, hotel_info in hotels.items():
                 photos = get_photos(hotel_id, photos_num)
-                for photo in photos:
-                    bot.send_photo(message.from_user.id, photo)
+                if photos_num != 0:
+                    for photo in photos:
+                        bot.send_photo(message.from_user.id, photo)
                 bot.send_message(message.from_user.id, hotel_info)
+            bot.send_message(message.from_user.id, 'Так же вы можете посмотреть:'
+                                                   '\n/lowprice - дешёвые отели'
+                                                   '\n/highprice - дорогие отели'
+                                                   '\n/bestdeal - лучшее предложение'
+                                                   '\n/history - история запросов')
             return True
 
 
