@@ -11,4 +11,3 @@ def low_price(message: Message):
     users_info_dict[message.from_user.id] = [{'hotels_price': 'PRICE_LOWEST_FIRST'}]
     bot.set_state(message.from_user.id, UserState.city, message.chat.id)
     getting_info.main()
-
