@@ -4,16 +4,16 @@
       "hotels_price": "BEST_SELLER"
     },
     {
-      "city": "Manhattan"
+      "city": "New York"
     },
     {
-      "destination_id": "1643911"
+      "destination_id": "1506246"
     },
     {
-      "check_in": "2022-09-01"
+      "check_in": "2022-07-28"
     },
     {
-      "check_out": "2022-09-03"
+      "check_out": "2022-08-13"
     },
     {
       "hotels_num": 3
@@ -22,13 +22,13 @@
       "min_price": 1
     },
     {
-      "max_price": 10000
+      "max_price": 1000000
     },
     {
-      "min_dist": 1
+      "min_dist": 0
     },
     {
-      "max_dist": 10000
+      "max_dist": 100
     }
   ]
 }
