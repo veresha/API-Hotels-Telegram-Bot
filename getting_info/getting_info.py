@@ -87,10 +87,10 @@ def main():
                                       callback.message.chat.id,
                                       callback.message.message_id)
                 users_info_dict[message.from_user.id].append({'check_out': str(result)})
-                bot.send_message(message.from_user.id, "Сколько отелей показать?")
+                bot.send_message(message.from_user.id, "Сколько отелей показать?(0 - 10)")
                 bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @decorator_check_info('Ошибка ввода, это должна быть цифра от 1 до 10!')
     @bot.message_handler(state=UserState.hotels_num)
     def get_hotels_num(message: Message) -> bool:
         try:
@@ -98,17 +98,18 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.')
-            users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
-            if users_info_dict[message.from_user.id][0]["hotels_price"] != "BEST_SELLER":
-                bot.send_message(message.from_user.id, "Сколько фото каждого отеля показать?")
-                bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
-            else:
-                bot.send_message(message.from_user.id, "Какая минимальная цена за ночь?")
-                bot.set_state(message.from_user.id, UserState.min_price, message.chat.id)
-            return True
+            if hotels_num in range(1, 11):
+                bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.')
+                users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
+                if users_info_dict[message.from_user.id][0]["hotels_price"] != "BEST_SELLER":
+                    bot.send_message(message.from_user.id, "Сколько фото каждого отеля показать?(0 - 10)")
+                    bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
+                else:
+                    bot.send_message(message.from_user.id, "Какая минимальная цена за ночь?")
+                    bot.set_state(message.from_user.id, UserState.min_price, message.chat.id)
+                return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
     @bot.message_handler(state=UserState.min_price)
     def get_min_price(message: Message):
         try:
@@ -116,12 +117,14 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, минимальная цена {message.text}.\n'
-                                                   f'Какая максимальная цена за ночь?')
-            users_info_dict[message.from_user.id].append({'min_price': min_price})
-            bot.set_state(message.from_user.id, UserState.max_price, message.chat.id)
+            if min_price > 0:
+                bot.send_message(message.from_user.id, f'Записал, минимальная цена {message.text}$.\n'
+                                                       f'Какая максимальная цена за ночь?')
+                users_info_dict[message.from_user.id].append({'min_price': min_price})
+                bot.set_state(message.from_user.id, UserState.max_price, message.chat.id)
+                return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимальной цены!')
     @bot.message_handler(state=UserState.max_price)
     def get_max_price(message: Message):
         try:
@@ -129,12 +132,14 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, максмальная цена {message.text}.\n'
-                                                   f'Какое минимальное расстояние до центра?')
-            users_info_dict[message.from_user.id].append({'max_price': max_price})
-            bot.set_state(message.from_user.id, UserState.min_dist, message.chat.id)
+            if max_price > users_info_dict.get(message.from_user.id)[6]['min_price']:
+                bot.send_message(message.from_user.id, f'Записал, максмальная цена {message.text}$.\n'
+                                                       f'Какое минимальное расстояние до центра?')
+                users_info_dict[message.from_user.id].append({'max_price': max_price})
+                bot.set_state(message.from_user.id, UserState.min_dist, message.chat.id)
+                return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
     @bot.message_handler(state=UserState.min_dist)
     def get_min_dist(message: Message):
         try:
@@ -142,12 +147,14 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, минимальное расстояние {message.text}.\n'
-                                                   f'Какое максимальное расстояние до центра?')
-            users_info_dict[message.from_user.id].append({'min_dist': min_dist})
-            bot.set_state(message.from_user.id, UserState.max_dist, message.chat.id)
+            if min_dist >= 0:
+                bot.send_message(message.from_user.id, f'Записал, минимальное расстояние {message.text} км.\n'
+                                                       f'Какое максимальное расстояние до центра?')
+                users_info_dict[message.from_user.id].append({'min_dist': min_dist})
+                bot.set_state(message.from_user.id, UserState.max_dist, message.chat.id)
+                return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимального расстояния!')
     @bot.message_handler(state=UserState.max_dist)
     def get_max_dist(message: Message):
         try:
@@ -155,12 +162,14 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Записал, максимальное расстояние {message.text}.\n'
-                                                   f'Сколько фото каждого отеля показать?')
-            users_info_dict[message.from_user.id].append({'max_dist': max_dist})
-            bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
+            if max_dist > users_info_dict[message.from_user.id][8]['min_dist']:
+                bot.send_message(message.from_user.id, f'Записал, максимальное расстояние {message.text} км.\n'
+                                                       f'Сколько фото каждого отеля показать?(0 - 10)')
+                users_info_dict[message.from_user.id].append({'max_dist': max_dist})
+                bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
+                return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра!')
+    @decorator_check_info('Ошибка ввода, это должна быть цифра от 0 до 10!')
     @bot.message_handler(state=UserState.photos_num)
     def get_photos_num(message: Message) -> bool:
         try:
@@ -168,20 +177,21 @@ def main():
         except ValueError:
             return False
         else:
-            bot.send_message(message.from_user.id, f'Загружаю по {message.text} фото')
-            hotels = get_hotels(message)
-            for hotel_id, hotel_info in hotels.items():
-                photos = get_photos(hotel_id, photos_num)
-                if photos_num != 0:
-                    for photo in photos:
-                        bot.send_photo(message.from_user.id, photo)
-                bot.send_message(message.from_user.id, hotel_info)
-            bot.send_message(message.from_user.id, 'Так же вы можете посмотреть:'
-                                                   '\n/lowprice - дешёвые отели'
-                                                   '\n/highprice - дорогие отели'
-                                                   '\n/bestdeal - лучшее предложение'
-                                                   '\n/history - история запросов')
-            return True
+            if photos_num <= 10:
+                bot.send_message(message.from_user.id, f'Загружаю по {message.text} фото.')
+                hotels = get_hotels(message)
+                for hotel_id, hotel_info in hotels.items():
+                    photos = get_photos(hotel_id, photos_num)
+                    if photos_num != 0:
+                        for photo in photos:
+                            bot.send_photo(message.from_user.id, photo)
+                    bot.send_message(message.from_user.id, hotel_info)
+                bot.send_message(message.from_user.id, 'Так же вы можете посмотреть:'
+                                                       '\n/lowprice - дешёвые отели'
+                                                       '\n/highprice - дорогие отели'
+                                                       '\n/bestdeal - лучшее предложение'
+                                                       '\n/history - история запросов')
+                return True
 
 
 if __name__ == '__main__':

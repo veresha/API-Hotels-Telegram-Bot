@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 from users_info_storage.users_info_storage import users_info_dict
 from telebot.types import Message
@@ -39,15 +40,17 @@ def get_hotels(message: Message) -> dict:
 	try:
 		min_price = users_info_dict.get(message.from_user.id)[6]['min_price']
 		max_price = users_info_dict.get(message.from_user.id)[7]['max_price']
-		# min_dist = users_info_dict[message.from_user.id][8]['min_dist']
-		# max_dist = users_info_dict[message.from_user.id][5]['max_dist']
+		min_dist = float(users_info_dict[message.from_user.id][8]['min_dist'])
+		max_dist = float(users_info_dict[message.from_user.id][9]['max_dist'])
 	except IndexError:
 		min_price = None
 		max_price = None
+		min_dist = 0
+		max_dist = 1000000000000
 	querystring = {
 		"destinationId": destination_id,
 		"pageNumber": "1",
-		"pageSize": hotels_num,
+		"pageSize": 15,
 		"checkIn": check_in,
 		"checkOut": check_out,
 		"priceMin": min_price,
@@ -57,15 +60,35 @@ def get_hotels(message: Message) -> dict:
 	}
 	response = request_to_api(endpoint=endpoint_hotels, querystring=querystring)
 	hotels = response.json().get('data', {}).get('body', {}).get("searchResults", {}).get('results')
+
 	hotels_info = {}
+	hotels_count = 0
+
 	for hotel in hotels:
-		hotels_info[hotel.get("id", {})] = (f'🏨 Название отеля: {hotel.get("name", {})}\n'
-									f'🌎 Адрес: {hotel.get("address", {}).get("streetAddress", {})}\n'
-									f'🌇 Расстояние до центра: {hotel.get("landmarks", {})[0].get("distance", {})}\n'
-									f'⭐ Рейтинг от пользователей: {hotel.get("guestReviews", {}).get("rating", {})}\n'
-									f'✨ Рейтинг по звёздам: {hotel.get("starRating", {})}\n'
-									f'1️⃣ Цена за ночь: {hotel.get("ratePlan", {}).get("price", {}).get("current", {})}\n'
-									f'🌐 Сайт: https://www.hotels.com/ho{hotel.get("id", {})}')
+		hotel_name = hotel.get("name", {})
+		address = hotel.get("address", {}).get("streetAddress", {})
+		dist = hotel.get("landmarks", {})[0].get("distance", {})
+		rating = hotel.get("guestReviews", {}).get("rating", {})
+		star_rating = hotel.get("starRating", {})
+		site = hotel.get("id", {})
+		price = hotel.get("ratePlan", {}).get("price", {}).get("current", {})
+		total_price = str((datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days *
+						  int(price[1:]))
+
+		float_dist = float(dist.replace(',', '.')[:3])
+		if hotels_count == hotels_num:
+			break
+		if (hotel_name or address or dist or rating or star_rating or price) is not None and\
+				min_dist <= float_dist <= max_dist:
+			hotels_info[hotel.get("id", {})] = (f'🏨 Название отеля: {hotel_name}\n'
+												f'🌎 Адрес: {address}\n'
+												f'🌇 Расстояние до центра: {dist}\n'
+												f'⭐ Рейтинг от пользователей: {rating}\n'
+												f'✨ Рейтинг по звёздам: {star_rating}\n'
+												f'🌐 Сайт: https://www.hotels.com/ho{site}\n'
+												f'1️⃣ Цена за ночь: {price}\n'
+												f'💳 Цена за весь период: ${total_price}')
+			hotels_count += 1
 	return hotels_info
 
 
