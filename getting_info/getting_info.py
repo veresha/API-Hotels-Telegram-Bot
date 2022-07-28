@@ -90,8 +90,8 @@ def main():
                 bot.send_message(message.from_user.id, "Сколько отелей показать?(0 - 10)")
                 bot.set_state(message.from_user.id, UserState.hotels_num, message.chat.id)
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра от 1 до 10!')
     @bot.message_handler(state=UserState.hotels_num)
+    @decorator_check_info('Ошибка ввода, это должна быть цифра от 1 до 10!')
     def get_hotels_num(message: Message) -> bool:
         try:
             hotels_num = int(message.text)
@@ -109,8 +109,8 @@ def main():
                     bot.set_state(message.from_user.id, UserState.min_price, message.chat.id)
                 return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
     @bot.message_handler(state=UserState.min_price)
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
     def get_min_price(message: Message):
         try:
             min_price = int(message.text)
@@ -124,8 +124,8 @@ def main():
                 bot.set_state(message.from_user.id, UserState.max_price, message.chat.id)
                 return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимальной цены!')
     @bot.message_handler(state=UserState.max_price)
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимальной цены!')
     def get_max_price(message: Message):
         try:
             max_price = int(message.text)
@@ -139,8 +139,8 @@ def main():
                 bot.set_state(message.from_user.id, UserState.min_dist, message.chat.id)
                 return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
     @bot.message_handler(state=UserState.min_dist)
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
     def get_min_dist(message: Message):
         try:
             min_dist = int(message.text)
@@ -154,8 +154,8 @@ def main():
                 bot.set_state(message.from_user.id, UserState.max_dist, message.chat.id)
                 return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимального расстояния!')
     @bot.message_handler(state=UserState.max_dist)
+    @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимального расстояния!')
     def get_max_dist(message: Message):
         try:
             max_dist = int(message.text)
@@ -169,8 +169,8 @@ def main():
                 bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
                 return True
 
-    @decorator_check_info('Ошибка ввода, это должна быть цифра от 0 до 10!')
     @bot.message_handler(state=UserState.photos_num)
+    @decorator_check_info('Ошибка ввода, это должна быть цифра от 0 до 10!')
     def get_photos_num(message: Message) -> bool:
         try:
             photos_num = int(message.text)
