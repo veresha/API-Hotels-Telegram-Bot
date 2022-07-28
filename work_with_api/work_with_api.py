@@ -72,14 +72,15 @@ def get_hotels(message: Message) -> dict:
 		star_rating = hotel.get("starRating", {})
 		site = hotel.get("id", {})
 		price = hotel.get("ratePlan", {}).get("price", {}).get("current", {})
-		total_price = str((datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days *
-						  int(price[1:]))
 
 		float_dist = float(dist.replace(',', '.')[:3])
 		if hotels_count == hotels_num:
 			break
 		if (hotel_name or address or dist or rating or star_rating or price) is not None and\
 				min_dist <= float_dist <= max_dist:
+			total_price = str(
+				(datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days *
+				int(price[1:]))
 			hotels_info[hotel.get("id", {})] = (f'🏨 Название отеля: {hotel_name}\n'
 												f'🌎 Адрес: {address}\n'
 												f'🌇 Расстояние до центра: {dist}\n'
