@@ -45,7 +45,7 @@ def main():
     @bot.message_handler(state=UserState.check_in)
     def get_check_in(message: Message):
         calendar, step = MyStyleCalendar(locale='ru', min_date=date.today()).build()
-        bot.send_message(message.from_user.id, f'Теперь выберите дату заселения',
+        bot.send_message(message.from_user.id, f'Теперь выберите дату заселения:',
                          reply_markup=calendar)
 
         @bot.callback_query_handler(state=UserState.check_in, func=MyStyleCalendar.func())
@@ -53,7 +53,7 @@ def main():
             result, key, step = MyStyleCalendar(
                 locale='ru', min_date=date.today()).process(callback.data)
             if not result and key:
-                bot.edit_message_text(f"Выберите дату заселения",
+                bot.edit_message_text(f"Выберите дату заселения:",
                                       callback.message.chat.id,
                                       callback.message.message_id,
                                       reply_markup=key)
@@ -70,7 +70,7 @@ def main():
         check_in_date = datetime.strptime(
             users_info_dict[message.from_user.id][3]['check_in'], "%Y-%m-%d").date()
         calendar, step = MyStyleCalendar(locale='ru', min_date=check_in_date).build()
-        bot.send_message(message.from_user.id, f'Теперь выберете дату выезда',
+        bot.send_message(message.from_user.id, f'Теперь выберите дату выезда:',
                          reply_markup=calendar)
 
         @bot.callback_query_handler(func=MyStyleCalendar.func())
@@ -78,7 +78,7 @@ def main():
             result, key, step = MyStyleCalendar(
                 locale='ru', min_date=check_in_date + timedelta(days=1)).process(callback.data)
             if not result and key:
-                bot.edit_message_text(f"Выберите дату выезда",
+                bot.edit_message_text(f"Выберите дату выезда:",
                                       callback.message.chat.id,
                                       callback.message.message_id,
                                       reply_markup=key)
@@ -191,7 +191,7 @@ def main():
                                                        '\n/highprice - дорогие отели'
                                                        '\n/bestdeal - лучшее предложение'
                                                        '\n/history - история запросов')
-                return True
+            return True
 
 
 if __name__ == '__main__':
