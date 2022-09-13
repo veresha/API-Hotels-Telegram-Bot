@@ -100,8 +100,8 @@ def get_hotels(message: Message) -> dict:
 				command = 'Best deal'
 
 			info = (
-				message.from_user.id, message.chat.id, str(datetime.today()),
-				users_info_dict.get(message.from_user.id)[1]['city'], check_in, check_out, hotels_num, command,
+				message.from_user.id, message.chat.id, str(datetime.today())[:19],
+				users_info_dict.get(message.from_user.id)[1]['city'], hotel_name, check_in, check_out, hotels_num, command,
 				min_price, max_price, dist, 'https://www.hotels.com/ho' + str(site), price, total_price)
 			set_history(info)
 	return hotels_info
@@ -110,9 +110,14 @@ def get_hotels(message: Message) -> dict:
 def get_photos(hotel_id: str, photos_num: int) -> list:
 	endpoint_photos = 'properties/get-hotel-photos'
 	querystring = {"id": hotel_id}
-	response = request_to_api(endpoint=endpoint_photos, querystring=querystring)
 	final_photos = []
-	photos = response.json().get("hotelImages", {})
+	while True:
+		response = request_to_api(endpoint=endpoint_photos, querystring=querystring)
+		try:
+			photos = response.json().get("hotelImages", {})
+			break
+		except AttributeError:
+			photos = 'Ошибка с базой фотографий'
 	for num, photo in enumerate(photos, 1):
 		final_photos.append(str(photo.get('baseUrl', {})).replace('{size}', 'y'))
 		if num == photos_num:

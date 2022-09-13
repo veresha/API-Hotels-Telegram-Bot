@@ -10,6 +10,7 @@ def create_table():
                        chat_id TEXT,
                        datetime TEXT,
                        city TEXT,
+                       hotel_name TEXT,
                        checkin TEXT,
                        checkout TEXT,
                        quantity TEXT,
@@ -26,14 +27,14 @@ def create_table():
 def set_history(history: dict) -> None:
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
-        cur.execute(f"INSERT INTO history(uid, chat_id, datetime, city, checkin, checkout, quantity, commands, "
-                    f"price_min, price_max, distance, site, price, total_price) "
-                    f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", history)
+        cur.execute(f"INSERT INTO history(uid, chat_id, datetime, city, hotel_name, checkin, checkout, quantity, "
+                    f"commands, price_min, price_max, distance, site, price, total_price) "
+                    f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", history)
 
 
 def get_history(user_id: str):
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
-        cur.execute(f"SELECT uid, datetime, commands, city, quantity, checkin, checkout, price_min, price_max, "
-                    f"site, distance, total_price from history WHERE chat_id = '{user_id}'")
+        cur.execute(f"SELECT uid, datetime, commands, city, hotel_name, quantity, checkin, checkout, price_min, "
+                    f"price_max, site, distance, total_price from history WHERE chat_id = '{user_id}'")
         return cur.fetchall()
