@@ -5,7 +5,7 @@ from dbworker.dbworker import get_history
 
 @bot.message_handler(commands=['history'])
 def hello_world_message(message: Message):
-    bot.send_message(message.from_user.id, "История запросов.")
+    bot.send_message(message.from_user.id, "История запросов:")
     users_history = get_history(message.from_user.id)
     print(users_history[0])
     for i in users_history:
@@ -22,3 +22,6 @@ def hello_world_message(message: Message):
                f'Расстояние до центра: {i[10]}\n' \
                f'Стоимость за весь период: {i[11]}$'
         bot.send_message(message.from_user.id, info)
+    bot.send_message(message.from_user.id, 'Желаете выполнить ещё какое-то действие?\n/lowprice - дешёвые отели,'
+                                           '\n/highprice - дорогие отели,\n/bestdeal - лучшее предложение')
+

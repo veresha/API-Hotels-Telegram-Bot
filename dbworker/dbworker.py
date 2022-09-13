@@ -31,10 +31,9 @@ def set_history(history: dict) -> None:
                     f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", history)
 
 
-def get_history(id: str):
-    """Функция для получения данных из таблицы history"""
+def get_history(user_id: str):
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
         cur.execute(f"SELECT uid, datetime, commands, city, quantity, checkin, checkout, price_min, price_max, "
-                    f"site, distance, total_price from history WHERE chat_id = '{id}'")
+                    f"site, distance, total_price from history WHERE chat_id = '{user_id}'")
         return cur.fetchall()
