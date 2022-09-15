@@ -2,6 +2,8 @@ from datetime import datetime
 import requests
 from users_info_storage.users_info_storage import users_info_dict
 from telebot.types import Message
+from dbworker.dbworker import set_history
+
 
 url = "https://hotels4.p.rapidapi.com/"
 headers = {
@@ -35,7 +37,7 @@ def get_hotels(message: Message) -> dict:
 	destination_id = users_info_dict.get(message.from_user.id)[2]['destination_id']
 	check_in = users_info_dict.get(message.from_user.id)[3]['check_in']
 	check_out = users_info_dict.get(message.from_user.id)[4]['check_out']
-	price = users_info_dict.get(message.from_user.id)[0]['hotels_price']
+	sort_order = users_info_dict.get(message.from_user.id)[0]['hotels_price']
 	hotels_num = users_info_dict.get(message.from_user.id)[5]['hotels_num']
 	try:
 		min_price = users_info_dict.get(message.from_user.id)[6]['min_price']
@@ -55,7 +57,7 @@ def get_hotels(message: Message) -> dict:
 		"checkOut": check_out,
 		"priceMin": min_price,
 		"priceMax": max_price,
-		"adults1": "1", "sortOrder": price,
+		"adults1": "1", "sortOrder": sort_order,
 		"locale": "ru_RU", "currency": "USD"
 	}
 	response = request_to_api(endpoint=endpoint_hotels, querystring=querystring)
@@ -71,7 +73,7 @@ def get_hotels(message: Message) -> dict:
 		rating = hotel.get("guestReviews", {}).get("rating", {})
 		star_rating = hotel.get("starRating", {})
 		site = hotel.get("id", {})
-		price = hotel.get("ratePlan", {}).get("price", {}).get("current", {})
+		price = hotel.get("ratePlan", {}).get("price", {}).get("current", {}).replace(',', '')
 
 		float_dist = float(dist.replace(',', '.')[:3])
 		if hotels_count == hotels_num:
@@ -90,15 +92,32 @@ def get_hotels(message: Message) -> dict:
 												f'1️⃣ Цена за ночь: {price}\n'
 												f'💳 Цена за весь период: ${total_price}')
 			hotels_count += 1
+			if sort_order == 'PRICE_LOWEST_FIRST':
+				command = 'Low price'
+			elif sort_order == 'PRICE_HIGHEST_FIRST':
+				command = 'High price'
+			else:
+				command = 'Best deal'
+
+			info = (
+				message.from_user.id, message.chat.id, str(datetime.today())[:19],
+				users_info_dict.get(message.from_user.id)[1]['city'], hotel_name, check_in, check_out, hotels_num, command,
+				min_price, max_price, dist, 'https://www.hotels.com/ho' + str(site), price, total_price)
+			set_history(info)
 	return hotels_info
 
 
 def get_photos(hotel_id: str, photos_num: int) -> list:
 	endpoint_photos = 'properties/get-hotel-photos'
 	querystring = {"id": hotel_id}
-	response = request_to_api(endpoint=endpoint_photos, querystring=querystring)
 	final_photos = []
-	photos = response.json().get("hotelImages", {})
+	while True:
+		response = request_to_api(endpoint=endpoint_photos, querystring=querystring)
+		try:
+			photos = response.json().get("hotelImages", {})
+			break
+		except AttributeError:
+			photos = 'Ошибка с базой фотографий'
 	for num, photo in enumerate(photos, 1):
 		final_photos.append(str(photo.get('baseUrl', {})).replace('{size}', 'y'))
 		if num == photos_num:
