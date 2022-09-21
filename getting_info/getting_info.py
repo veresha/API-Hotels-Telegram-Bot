@@ -1,13 +1,13 @@
+from datetime import datetime, timedelta, date
+import functools
 from telebot.types import Message
+from telebot.types import ReplyKeyboardRemove
 from load_bot import bot
 from states.user_state import UserState
-import functools
 from users_info_storage.users_info_storage import users_info_dict
-from work_with_api.work_with_api import get_city_districts, get_hotels, get_photos
-from telebot.types import ReplyKeyboardRemove
+from work_with_api.work_with_api import (get_city_districts, get_hotels, get_photos)
 from keyboards.reply.district_choice import district_choice
 from keyboards.inline.calendar import MyStyleCalendar
-from datetime import datetime, timedelta, date
 
 
 def decorator_check_info(text: str):
@@ -21,7 +21,8 @@ def decorator_check_info(text: str):
     return wrapper
 
 
-def main():
+def main() -> None:
+    """Основная функция для получения данных от пользователя"""
     @bot.message_handler(state=UserState.city)
     def get_city(message: Message) -> None:
         """Функция для получения названия города"""
@@ -41,7 +42,8 @@ def main():
         bot.send_message(message.from_user.id, f'Записал! Вы выбрали {message.text}.',
                          reply_markup=ReplyKeyboardRemove())
         city_districts = get_city_districts(message.text)
-        users_info_dict[message.from_user.id].append({'destination_id': city_districts[message.text]})
+        users_info_dict[message.from_user.id].append(
+            {'destination_id': city_districts[message.text]})
         bot.set_state(message.from_user.id, UserState.check_in, message.chat.id)
         get_check_in(message)
 
@@ -49,7 +51,7 @@ def main():
     def get_check_in(message: Message) -> None:
         """Функция для построение календаря заселения"""
         calendar, step = MyStyleCalendar(locale='ru', min_date=date.today()).build()
-        bot.send_message(message.from_user.id, f'Теперь выберите дату заселения:',
+        bot.send_message(message.from_user.id, 'Теперь выберите дату заселения:',
                          reply_markup=calendar)
 
         @bot.callback_query_handler(state=UserState.check_in, func=MyStyleCalendar.func())
@@ -58,7 +60,7 @@ def main():
             result, key, step = MyStyleCalendar(
                 locale='ru', min_date=date.today()).process(callback.data)
             if not result and key:
-                bot.edit_message_text(f"Выберите дату заселения:",
+                bot.edit_message_text("Выберите дату заселения:",
                                       callback.message.chat.id,
                                       callback.message.message_id,
                                       reply_markup=key)
@@ -76,7 +78,7 @@ def main():
         check_in_date = datetime.strptime(
             users_info_dict[message.from_user.id][3]['check_in'], "%Y-%m-%d").date()
         calendar, step = MyStyleCalendar(locale='ru', min_date=check_in_date).build()
-        bot.send_message(message.from_user.id, f'Теперь выберите дату выезда:',
+        bot.send_message(message.from_user.id, 'Теперь выберите дату выезда:',
                          reply_markup=calendar)
 
         @bot.callback_query_handler(func=MyStyleCalendar.func())
@@ -85,7 +87,7 @@ def main():
             result, key, step = MyStyleCalendar(
                 locale='ru', min_date=check_in_date + timedelta(days=1)).process(callback.data)
             if not result and key:
-                bot.edit_message_text(f"Выберите дату выезда:",
+                bot.edit_message_text("Выберите дату выезда:",
                                       callback.message.chat.id,
                                       callback.message.message_id,
                                       reply_markup=key)
@@ -110,7 +112,8 @@ def main():
                 bot.send_message(message.from_user.id, f'Записал, выводим {hotels_num} отеля/ей.')
                 users_info_dict[message.from_user.id].append({'hotels_num': hotels_num})
                 if users_info_dict[message.from_user.id][0]["hotels_price"] != "BEST_SELLER":
-                    bot.send_message(message.from_user.id, "Сколько фото каждого отеля показать?(0 - 10)")
+                    bot.send_message(message.from_user.id,
+                                     "Сколько фото каждого отеля показать?(0 - 10)")
                     bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
                 else:
                     bot.send_message(message.from_user.id, "Какая минимальная цена за ночь?")
@@ -127,8 +130,9 @@ def main():
             return False
         else:
             if min_price > 0:
-                bot.send_message(message.from_user.id, f'Записал, минимальная цена {message.text}$.\n'
-                                                       f'Какая максимальная цена за ночь?')
+                bot.send_message(message.from_user.id,
+                                 f'Записал, минимальная цена {message.text}$.\n '
+                                 f'Какая максимальная цена за ночь?')
                 users_info_dict[message.from_user.id].append({'min_price': min_price})
                 bot.set_state(message.from_user.id, UserState.max_price, message.chat.id)
                 return True
@@ -142,9 +146,11 @@ def main():
         except ValueError:
             return False
         else:
-            if max_price > users_info_dict.get(message.from_user.id)[6]['min_price']:
-                bot.send_message(message.from_user.id, f'Записал, максмальная цена {message.text}$.\n'
-                                                       f'Какое минимальное расстояние до центра?')
+            if max_price > users_info_dict.get(
+                    message.from_user.id)[6]['min_price']:
+                bot.send_message(message.from_user.id,
+                                 f'Записал, максмальная цена {message.text}$.\n'
+                                 f'Какое минимальное расстояние до центра?')
                 users_info_dict[message.from_user.id].append({'max_price': max_price})
                 bot.set_state(message.from_user.id, UserState.min_dist, message.chat.id)
                 return True
@@ -159,8 +165,9 @@ def main():
             return False
         else:
             if min_dist >= 0:
-                bot.send_message(message.from_user.id, f'Записал, минимальное расстояние {message.text} км.\n'
-                                                       f'Какое максимальное расстояние до центра?')
+                bot.send_message(message.from_user.id,
+                                 f'Записал, минимальное расстояние {message.text} км.\n'
+                                 f'Какое максимальное расстояние до центра?')
                 users_info_dict[message.from_user.id].append({'min_dist': min_dist})
                 bot.set_state(message.from_user.id, UserState.max_dist, message.chat.id)
                 return True
@@ -175,8 +182,9 @@ def main():
             return False
         else:
             if max_dist > users_info_dict[message.from_user.id][8]['min_dist']:
-                bot.send_message(message.from_user.id, f'Записал, максимальное расстояние {message.text} км.\n'
-                                                       f'Сколько фото каждого отеля показать?(0 - 10)')
+                bot.send_message(message.from_user.id,
+                                 f'Записал, максимальное расстояние {message.text} км.\n'
+                                 f'Сколько фото каждого отеля показать?(0 - 10)')
                 users_info_dict[message.from_user.id].append({'max_dist': max_dist})
                 bot.set_state(message.from_user.id, UserState.photos_num, message.chat.id)
                 return True

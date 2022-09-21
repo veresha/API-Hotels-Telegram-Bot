@@ -8,4 +8,4 @@ def hello_message(message: Message) -> None:
     bot.send_message(
         message.from_user.id,
         f'Привет, {message.from_user.username}! В какой ценовой категории будем искать отели?'
-        '\n/lowprice - дешёвые отели, \n/highprice - дорогие отели, \n/bestdeal - лучшее предложение')
+        '\n/lowprice - дешёвые отели,\n/highprice - дорогие отели,\n/bestdeal - лучшее предложение')

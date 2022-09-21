@@ -15,8 +15,8 @@ def history(message: Message) -> None:
         else:
             min_price = i[8] + '$'
             max_price = i[9] + '$'
-        info = (f'ID_пользователя: {i[0]}\n' 
-               f'Дата запроса: {i[1]}\n' 
+        info = (f'ID_пользователя: {i[0]}\n'
+               f'Дата запроса: {i[1]}\n'
                f'Команда: {i[2]}\n'
                f'Город/район: {i[3]}\n'
                f'Количество отелей: {i[5]}\n'
@@ -29,5 +29,6 @@ def history(message: Message) -> None:
                f'Расстояние до центра: {i[11]}\n'
                f'Стоимость за весь период: {i[12]}$')
         bot.send_message(message.from_user.id, info)
-    bot.send_message(message.from_user.id, 'Желаете выполнить ещё какое-то действие?\n/lowprice - дешёвые отели,'
-                                           '\n/highprice - дорогие отели,\n/bestdeal - лучшее предложение')
+    bot.send_message(message.from_user.id,
+                     'Желаете выполнить ещё какое-то действие?\n/lowprice - дешёвые отели,'
+                     '\n/highprice - дорогие отели,\n/bestdeal - лучшее предложение')

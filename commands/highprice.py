@@ -1,7 +1,6 @@
 from telebot.types import Message
 from load_bot import bot
 from states.user_state import UserState
-from getting_info import getting_info
 from users_info_storage.users_info_storage import users_info_dict
 from getting_info import getting_info
 
