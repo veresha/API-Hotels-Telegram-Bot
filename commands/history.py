@@ -4,7 +4,8 @@ from dbworker.dbworker import get_history
 
 
 @bot.message_handler(commands=['history'])
-def history(message: Message):
+def history(message: Message) -> None:
+    """Функция для формирования и вывода пользователю истории запросов"""
     bot.send_message(message.from_user.id, "История запросов:")
     users_history = get_history(message.from_user.id)
     for i in users_history:
@@ -14,8 +15,8 @@ def history(message: Message):
         else:
             min_price = i[8] + '$'
             max_price = i[9] + '$'
-        info = (f'ID_пользователя: {i[0]}\n' 
-               f'Дата запроса: {i[1]}\n' 
+        info = (f'ID_пользователя: {i[0]}\n'
+               f'Дата запроса: {i[1]}\n'
                f'Команда: {i[2]}\n'
                f'Город/район: {i[3]}\n'
                f'Количество отелей: {i[5]}\n'
@@ -28,6 +29,6 @@ def history(message: Message):
                f'Расстояние до центра: {i[11]}\n'
                f'Стоимость за весь период: {i[12]}$')
         bot.send_message(message.from_user.id, info)
-    bot.send_message(message.from_user.id, 'Желаете выполнить ещё какое-то действие?\n/lowprice - дешёвые отели,'
-                                           '\n/highprice - дорогие отели,\n/bestdeal - лучшее предложение')
-
+    bot.send_message(message.from_user.id,
+                     'Желаете выполнить ещё какое-то действие?\n/lowprice - дешёвые отели,'
+                     '\n/highprice - дорогие отели,\n/bestdeal - лучшее предложение')
