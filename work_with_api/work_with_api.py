@@ -12,6 +12,7 @@ headers = {
 
 
 def request_to_api(endpoint: str, querystring: dict):
+	"""Функция для запроса к API"""
 	try:
 		response = requests.get(url + endpoint, headers=headers, params=querystring, timeout=10)
 		if response.status_code == requests.codes.ok:
@@ -23,6 +24,7 @@ def request_to_api(endpoint: str, querystring: dict):
 
 
 def get_city_districts(city: str) -> dict:
+	"""Функция получения районов города из API"""
 	endpoint_city_id = 'locations/v2/search'
 	querystring = {"query": city}
 	response = request_to_api(endpoint=endpoint_city_id, querystring=querystring)
@@ -33,6 +35,7 @@ def get_city_districts(city: str) -> dict:
 
 
 def get_hotels(message: Message) -> dict:
+	"""Функция получения общей информации об отелях из API и формирования словаря отелей"""
 	endpoint_hotels = 'properties/list'
 	destination_id = users_info_dict.get(message.from_user.id)[2]['destination_id']
 	check_in = users_info_dict.get(message.from_user.id)[3]['check_in']
@@ -78,7 +81,7 @@ def get_hotels(message: Message) -> dict:
 		float_dist = float(dist.replace(',', '.')[:3])
 		if hotels_count == hotels_num:
 			break
-		if (hotel_name or address or dist or rating or star_rating or price) is not None and\
+		if (hotel_name or address or dist or rating or star_rating or price) is not None and \
 				min_dist <= float_dist <= max_dist:
 			total_price = str(
 				(datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days *
@@ -108,6 +111,7 @@ def get_hotels(message: Message) -> dict:
 
 
 def get_photos(hotel_id: str, photos_num: int) -> list:
+	"""Функция получения ссылок на фотографий отелей из API и отправки их"""
 	endpoint_photos = 'properties/get-hotel-photos'
 	querystring = {"id": hotel_id}
 	final_photos = []
@@ -123,4 +127,3 @@ def get_photos(hotel_id: str, photos_num: int) -> list:
 		if num == photos_num:
 			break
 	return final_photos
-

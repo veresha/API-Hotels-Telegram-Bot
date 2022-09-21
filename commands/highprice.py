@@ -7,7 +7,8 @@ from getting_info import getting_info
 
 
 @bot.message_handler(commands=['highprice'])
-def low_price(message: Message):
+def high_price(message: Message) -> None:
+    """Функция хендлер для команды /highprice"""
     bot.send_message(message.from_user.id, "Вы выбрали дорогие отели. В какой город отправляемся?")
     users_info_dict[message.from_user.id] = [{'hotels_price': 'PRICE_HIGHEST_FIRST'}]
     bot.set_state(message.from_user.id, UserState.city, message.chat.id)

@@ -1,7 +1,8 @@
 import sqlite3 as sq
 
 
-def create_table():
+def create_table() -> None:
+    """Функция для создания базы данных в случае если она отсутствует"""
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS history(
@@ -25,6 +26,7 @@ def create_table():
 
 
 def set_history(history: dict) -> None:
+    """Функция записи данныз в базу данных"""
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
         cur.execute(f"INSERT INTO history(uid, chat_id, datetime, city, hotel_name, checkin, checkout, quantity, "
@@ -32,7 +34,8 @@ def set_history(history: dict) -> None:
                     f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", history)
 
 
-def get_history(user_id: str):
+def get_history(user_id: str) -> list:
+    """Функция для извлечения из базы данных истории запросов"""
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
         cur.execute(f"SELECT uid, datetime, commands, city, hotel_name, quantity, checkin, checkout, price_min, "

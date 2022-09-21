@@ -10,7 +10,8 @@ from keyboards.inline.calendar import MyStyleCalendar
 from datetime import datetime, timedelta, date
 
 
-def decorator_check_info(text):
+def decorator_check_info(text: str):
+    """Функция-декоратор для проверка введенных данных"""
     def wrapper(func):
         @functools.wraps(func)
         def wrapped_wrapper(message, *args, **kwargs):
@@ -23,6 +24,7 @@ def decorator_check_info(text):
 def main():
     @bot.message_handler(state=UserState.city)
     def get_city(message: Message) -> None:
+        """Функция для получения названия города"""
         city_districts = get_city_districts(message.text)
         if city_districts:
             keyboard = district_choice(city_districts.keys())
@@ -33,7 +35,8 @@ def main():
             bot.send_message(message.from_user.id, 'Такого города не знаю.')
 
     @bot.message_handler(state=UserState.choice_district)
-    def choice_district(message: Message):
+    def choice_district(message: Message) -> None:
+        """Функция для получения района города"""
         users_info_dict[message.from_user.id].append({'city': message.text})
         bot.send_message(message.from_user.id, f'Записал! Вы выбрали {message.text}.',
                          reply_markup=ReplyKeyboardRemove())
@@ -43,13 +46,15 @@ def main():
         get_check_in(message)
 
     @bot.message_handler(state=UserState.check_in)
-    def get_check_in(message: Message):
+    def get_check_in(message: Message) -> None:
+        """Функция для построение календаря заселения"""
         calendar, step = MyStyleCalendar(locale='ru', min_date=date.today()).build()
         bot.send_message(message.from_user.id, f'Теперь выберите дату заселения:',
                          reply_markup=calendar)
 
         @bot.callback_query_handler(state=UserState.check_in, func=MyStyleCalendar.func())
-        def callback_check_in(callback):
+        def callback_check_in(callback) -> None:
+            """Функция-колбэк для получения даты заселение"""
             result, key, step = MyStyleCalendar(
                 locale='ru', min_date=date.today()).process(callback.data)
             if not result and key:
@@ -66,7 +71,8 @@ def main():
                 get_check_out(message)
 
     @bot.message_handler(state=UserState.check_out)
-    def get_check_out(message: Message):
+    def get_check_out(message: Message) -> None:
+        """Функция для построение календаря выселения"""
         check_in_date = datetime.strptime(
             users_info_dict[message.from_user.id][3]['check_in'], "%Y-%m-%d").date()
         calendar, step = MyStyleCalendar(locale='ru', min_date=check_in_date).build()
@@ -74,7 +80,8 @@ def main():
                          reply_markup=calendar)
 
         @bot.callback_query_handler(func=MyStyleCalendar.func())
-        def callback_check_out(callback):
+        def callback_check_out(callback) -> None:
+            """Функция-колбэк для получения даты выселение"""
             result, key, step = MyStyleCalendar(
                 locale='ru', min_date=check_in_date + timedelta(days=1)).process(callback.data)
             if not result and key:
@@ -93,6 +100,7 @@ def main():
     @bot.message_handler(state=UserState.hotels_num)
     @decorator_check_info('Ошибка ввода, это должна быть цифра от 1 до 10!')
     def get_hotels_num(message: Message) -> bool:
+        """Функция для получения количества отелей"""
         try:
             hotels_num = int(message.text)
         except ValueError:
@@ -111,7 +119,8 @@ def main():
 
     @bot.message_handler(state=UserState.min_price)
     @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
-    def get_min_price(message: Message):
+    def get_min_price(message: Message) -> bool:
+        """Функция для получения минимальной цены"""
         try:
             min_price = int(message.text)
         except ValueError:
@@ -126,7 +135,8 @@ def main():
 
     @bot.message_handler(state=UserState.max_price)
     @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимальной цены!')
-    def get_max_price(message: Message):
+    def get_max_price(message: Message) -> bool:
+        """Функция для получения максимальной цены"""
         try:
             max_price = int(message.text)
         except ValueError:
@@ -141,7 +151,8 @@ def main():
 
     @bot.message_handler(state=UserState.min_dist)
     @decorator_check_info('Ошибка ввода, это должна быть цифра больше 0!')
-    def get_min_dist(message: Message):
+    def get_min_dist(message: Message) -> bool:
+        """Функция для получения минимального расстояния до центра"""
         try:
             min_dist = int(message.text)
         except ValueError:
@@ -156,7 +167,8 @@ def main():
 
     @bot.message_handler(state=UserState.max_dist)
     @decorator_check_info('Ошибка ввода, это должна быть цифра больше минимального расстояния!')
-    def get_max_dist(message: Message):
+    def get_max_dist(message: Message) -> bool:
+        """Функция для получения максимального расстояния до центра"""
         try:
             max_dist = int(message.text)
         except ValueError:
@@ -172,6 +184,7 @@ def main():
     @bot.message_handler(state=UserState.photos_num)
     @decorator_check_info('Ошибка ввода, это должна быть цифра от 0 до 10!')
     def get_photos_num(message: Message) -> bool:
+        """Функция для получения количества фотографий"""
         try:
             photos_num = int(message.text)
         except ValueError:
