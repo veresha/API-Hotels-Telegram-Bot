@@ -83,7 +83,7 @@ def get_hotels(message: Message) -> dict:
         star_rating = hotel.get("starRating", {})
         site = hotel.get("id", {})
         price = hotel.get("ratePlan", {}).get("price", {}).get("current", {}).replace(',', '')
-        # print(price, type(price))
+        print(price, type(price))
         # if price is str:
         # 	price.replace(',', '')
         # else:
