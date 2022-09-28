@@ -82,12 +82,7 @@ def get_hotels(message: Message) -> dict:
         rating = hotel.get("guestReviews", {}).get("rating", {})
         star_rating = hotel.get("starRating", {})
         site = hotel.get("id", {})
-        price = hotel.get("ratePlan", {}).get("price", {}).get("current", {}).replace(',', '')
-        print(price, type(price))
-        # if price is str:
-        # 	price.replace(',', '')
-        # else:
-        # 	price = '$0'
+        price = hotel.get("ratePlan", {}).get("price", {}).get("current", '$0').replace(',', '')
 
         float_dist = float(dist.replace(',', '.')[:3])
         if hotels_count == hotels_num:
