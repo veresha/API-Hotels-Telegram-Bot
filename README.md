@@ -11,11 +11,7 @@ pip instal python-telegram-bot-calendar
 pip python-dotenv
 ```
 Список необходимых библиотек так же представлен в «requirements.txt».
-Нужен файл .env куда нужно сохранить RAPIDAPI_KEY и токен от вашего бота. Пример файла в «.env.template».
-```
-BOT_TOKEN = "5397321909:AAEfy-DvXMZ82aO_nYB9zqNZlEhi-c1Awu4"
-RAPID_API_KEY = "27c3b873d3msh5961c422d735f01p1d55e2jsne5957d6966a4"
-```
+Нужен файл .env куда нужно сохранить RAPIDAPI_KEY и токен от вашего бота.
 Бот использует API "rapidapi.com". Для работы с БД используется sqlite3.
 
 ### Состав
