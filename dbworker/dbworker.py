@@ -25,7 +25,7 @@ def create_table() -> None:
                     """)
 
 
-def set_history(history: dict) -> None:
+def set_history(history: dict | tuple) -> None:
     """Функция записи данныз в базу данных"""
     with sq.connect('db_history.db') as con:
         cur = con.cursor()
